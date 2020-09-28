@@ -9,17 +9,13 @@ class LimitSizeStream extends stream.Transform {
   }
 
   _transform(chunk, encoding, callback) {
-    try {
       const data = chunk.toString('utf8');
       this.totalSize += data.length;
       if (this.totalSize > this.limit) {
-        throw new LimitExceededError();
+        callback(new LimitExceededError());
       } else {
         callback(null, data);
       }
-    } catch(e) {
-        callback(e);
-    }
   }
 }
 

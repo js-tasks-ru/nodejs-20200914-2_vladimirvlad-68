@@ -8,28 +8,19 @@ class LineSplitStream extends stream.Transform {
   }
 
   _transform(chunk, encoding, callback) {
-      try{
-          this.data += chunk.toString();
-          if (this.data.indexOf(os.EOL) !== -1) {
-              let lines = this.data.split(os.EOL);
-              let lastElem = lines.splice(lines.length - 1, 1)[0];
-              lines.forEach(line => this.push(line));
-              this.data = lastElem;
-          }
-          callback()
-      }catch (e) {
-          callback(e);
+      this.data += chunk.toString();
+      if (this.data.indexOf(os.EOL) !== -1) {
+          let lines = this.data.split(os.EOL);
+          let lastElem = lines.splice(lines.length - 1, 1)[0];
+          lines.forEach(line => this.push(line));
+          this.data = lastElem;
       }
+      callback()
   }
 
   _flush(callback) {
-      try{
-          this.push(this.data);
-          callback();
-      }catch (e) {
-          callback(e);
-      }
-
+      this.push(this.data);
+      callback();
   }
 }
 
