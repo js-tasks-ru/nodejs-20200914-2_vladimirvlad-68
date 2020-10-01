@@ -11,52 +11,40 @@ server.on('request', (req, res) => {
 
   const filepath = path.join(__dirname, 'files', pathname);
 
-  const writableStream = fs.createWriteStream(`new.${filepath}`, {flags: 'wx'});
-
-  const limitStream = new LimitSizeStream({limit: 1000000});
-
-  let dataFile = [];
-
   switch (req.method) {
     case 'POST':
-        console.log(1, pathname);
         if (pathname.indexOf('/') !== -1) {
-            console.log(2);
             res.statusCode = 400;
             res.end('Nested path');
-            return;
         }
 
-        req.on('end', function() {
-            console.log(4);
-            limitStream.on('error', function(){
-                console.log(5);
-                res.statusCode = 413;
-                res.end('file size limit exceeded');
-            });
+        const limitStream = new LimitSizeStream({limit: 1000000});
 
-            writableStream.on('error', function(err) {
-                console.log(6);
-                if (err.code === 'EEXIST') {
-                    console.log(7);
-                    res.statusCode = 409;
-                    res.end('file has already existed');
-                    return;
-                }
-                fs.unlink(`new.${filepath}`);
-                res.statusCode = 500;
-                res.end();
-            });
-
-            writableStream.on('close', () => {
-                console.log(7);
-                res.statusCode = 201;
-                res.end('alright');
-            });
-
-            limitStream.pipe(writableStream);
-            limitStream.end();
+        limitStream.on('error', function(){
+            res.statusCode = 413;
+            res.end('file size limit exceeded');
         });
+
+        const writableStream = fs.createWriteStream(filepath, {flags: 'wx'});
+
+        writableStream.on('error', function(err) {
+            if (err.code === 'EEXIST') {
+                res.statusCode = 409;
+                res.end('file has already existed');
+                return;
+            }
+            fs.unlink(filepath);
+            res.statusCode = 500;
+            res.end();
+        });
+
+        writableStream.on('close', () => {
+            res.statusCode = 201;
+            res.end('alright');
+        });
+
+        limitStream.pipe(writableStream);
+        limitStream.end();
 
         break;
 
