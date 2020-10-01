@@ -16,11 +16,12 @@ server.on('request', (req, res) => {
         if (pathname.indexOf('/') !== -1) {
             res.statusCode = 400;
             res.end('Nested path');
+            return;
         }
 
         const limitStream = new LimitSizeStream({limit: 1000000});
 
-        limitStream.on('error', function(){
+        limitStream.on('error', function() {
             res.statusCode = 413;
             res.end('file size limit exceeded');
         });
