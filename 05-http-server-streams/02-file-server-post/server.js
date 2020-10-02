@@ -3,6 +3,7 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const LimitSizeStream = require('./LimitSizeStream');
+const {pipeline} = require('stream');
 
 const server = new http.Server();
 
@@ -44,8 +45,8 @@ server.on('request', (req, res) => {
             res.end('alright');
         });
 
+        req.pipe(limitStream);
         limitStream.pipe(writableStream);
-        limitStream.end();
 
         break;
 
