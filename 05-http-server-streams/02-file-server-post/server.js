@@ -23,6 +23,7 @@ server.on('request', (req, res) => {
         const limitStream = new LimitSizeStream({limit: 1000000});
 
         limitStream.on('error', function() {
+            unlink(filepath, [writableStream, limitStream]);
             res.statusCode = 413;
             res.end('file size limit exceeded');
         });
@@ -35,7 +36,7 @@ server.on('request', (req, res) => {
                 res.end('file has already existed');
                 return;
             }
-            fs.unlink(filepath);
+            unlink(filepath, [writableStream, limitStream]);
             res.statusCode = 500;
             res.end();
         });
@@ -45,8 +46,12 @@ server.on('request', (req, res) => {
             res.end('alright');
         });
 
-        req.pipe(limitStream);
-        limitStream.pipe(writableStream);
+        req.pipe(limitStream).pipe(writableStream);
+
+        req.on('aborted', () => {
+            unlink(filepath, [writableStream, limitStream]);
+            res.end();
+        });
 
         break;
 
@@ -55,5 +60,15 @@ server.on('request', (req, res) => {
       res.end('Not implemented');
   }
 });
+
+function unlink(filepath, streams) {
+    fs.unlink(filepath, (err) => {
+        if (!err) {
+            streams.forEach((stream) => {
+                stream.destroy();
+            });
+        }
+    });
+}
 
 module.exports = server;
