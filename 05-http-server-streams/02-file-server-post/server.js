@@ -23,10 +23,9 @@ server.on('request', (req, res) => {
         const limitStream = new LimitSizeStream({limit: 1000000});
 
         limitStream.on('error', function() {
-            console.log(1);
             fs.unlink(filepath, () => {});
             res.statusCode = 413;
-            res.end();
+            res.end('the big file');
         });
 
         const writableStream = fs.createWriteStream(filepath, {flags: 'wx'});
