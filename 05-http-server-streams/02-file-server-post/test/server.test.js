@@ -87,12 +87,12 @@ describe('http-server-streams/file-server-post', () => {
                     'файл big.png не должен оставаться на диске'
                 ).to.be.false;
                 done();
-              }, 100);
+              }, 1000);
             });
 
         request.on('error', (err) => {
           // EPIPE/ECONNRESET error should occur because we try to pipe after res closed
-          if (!['ECONNRESET', 'EPIPE'].includes(err.code)) done(err);
+          if (!['ECONNRESET', 'EPIPE', 'ECONNABORTED'].includes(err.code)) done(err);
         });
 
         fse.createReadStream(path.join(fixturesFolder, 'big.png')).pipe(request);
