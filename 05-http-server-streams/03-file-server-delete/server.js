@@ -17,25 +17,20 @@ server.on('request', (req, res) => {
             res.end('Nested path');
         }
 
-        const stream = fs.createReadStream(filepath);
-
-        stream.on('error', function(err) {
-            if (err.code === 'ENOENT') {
-                res.statusCode = 404;
-                res.end();
-            } else {
-                res.statusCode = 500;
-                res.end();
+        fs.unlink(filepath, (err) => {
+            if (!err) {
+                res.statusCode = 200;
+                res.end('alright');
             }
-        });
-
-        stream.pipe(res).once('close', function() {
-          fs.unlink(filepath, (err) => {
-              if (!err) {
-                  res.statusCode = 200;
-                  res.end('delete success');
-              }
-          });
+            else {
+                if (err.code === 'ENOENT') {
+                    res.statusCode = 404;
+                    res.end('такого файла на диске нет');
+                    return;
+                }
+                res.statusCode = 500;
+                res.end('server error');
+            }
         });
 
       break;
