@@ -15,6 +15,7 @@ server.on('request', (req, res) => {
         if (pathname.indexOf('/') !== -1) {
             res.statusCode = 400;
             res.end('Nested path');
+            return;
         }
 
         fs.unlink(filepath, (err) => {
