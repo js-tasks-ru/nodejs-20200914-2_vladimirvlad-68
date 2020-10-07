@@ -25,6 +25,7 @@ router.post('/publish', async (ctx, next) => {
     }
     ctx.status = 200;
     messages.forEach((resolve) => resolve(message));
+    messages = [];
     return next();
 });
 
