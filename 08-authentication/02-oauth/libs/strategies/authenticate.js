@@ -4,7 +4,7 @@ module.exports = async function authenticate(strategy, email, displayName, done)
 
     try {
         if (!email) {
-            return done(null, false, 'Укажите email');
+            return done('Укажите email');
         }
         let user = await User.findOne({email});
         if (!user) {
