@@ -16,7 +16,11 @@ module.exports = new LocalStrategy(
           return done(null, false, 'Неверный пароль');
         }
 
-        return done(null, user);
+        return done(null, {
+            email: user.email,
+            displayName: user.displayName,
+            id: user._id,
+        });
       } catch (err) {
         done(err);
       }
