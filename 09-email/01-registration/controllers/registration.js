@@ -51,7 +51,7 @@ module.exports.confirm = async (ctx, next) => {
         return;
     }
 
-    delete user.verificationToken;
+    user.verificationToken = undefined;
     user.save();
 
     ctx.body = {
